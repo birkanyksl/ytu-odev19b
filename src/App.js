@@ -2,68 +2,114 @@ import React, { useEffect, useState } from "react";
 
 function App() {
   const [text, setText] = useState("Deve");
-  const [buttonText1, setButtonText1] = useState("Deve");
-  const [buttonText2, setButtonText2] = useState("Cüce");
+  const [score, setScore] = useState(1);
+  const [mistakes, setMistakes] = useState(1);
+  const [gameOver, setGameOver] = useState(false);
+  const [gameResult, setGameResult] = useState("");
+
+  const playGame = (userChoice) => {
+    if (gameOver) return;
+
+    const choice = ["Deve", "Cüce"];
+    const computerChoice = choice[Math.floor(Math.random() * 2)];
+
+    console.log("Kullanıcının seçimi:", userChoice);
+    console.log("Bilgisayarın seçimi:", computerChoice);
+
+    if (userChoice === computerChoice) {
+      console.log("Doğru cevap!");
+      setScore((prevScore) => prevScore + 1);
+    } else {
+      console.log("Yanlış cevap!");
+      setMistakes((prevMistakes) => prevMistakes + 1);
+    }
+  };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setText((prevState) => (prevState === "Deve 🐪" ? "Cüce 😛" : "Deve 🐪"));
-    }, 2000);
+    if (!gameOver) {
+      const interval = setInterval(() => {
+        setText((prevState) =>
+          prevState === "Deve 🐪" ? "Cüce 😛" : "Deve 🐪"
+        );
+      }, 2000);
 
-    return () => clearInterval(interval);
-  }, []);
+      return () => clearInterval(interval);
+    }
+  }, [gameOver]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setButtonText1((prevState) => (prevState === "Deve" ? "Cüce" : "Deve"));
-      setButtonText2((prevState) => (prevState === "Cüce" ? "Deve" : "Cüce"));
-    }, 1000);
+    if (score === 5) {
+      setGameOver(true);
+      setGameResult("Kazandınız 🏆");
+    } else if (mistakes === 5) {
+      setGameOver(true);
+      setGameResult("Kaybettiniz 😞");
+    }
+  }, [score, mistakes]);
 
-    return () => clearInterval(interval);
-  }, []);
+  const restartGame = () => {
+    setScore(1);
+    setMistakes(1);
+    setGameOver(false);
+    setGameResult("");
+  };
 
   return (
     <div className="container-fluid d-flex flex-column justify-content-center vh-100">
       <h1 className="display-2 mt-5 mb-5 text-center">Deve Mi? Cüce Mi?</h1>
       <div className="container">
         <div className="text-center mb-5">
-          <h1 className="display-2">{text}</h1>
-          <div className="btn-group mt-5">
-            <button
-              type="button"
-              className="btn btn-lg btn-danger mx-2"
-              style={{ borderRadius: "10px", width: "200px" }}
-            >
-              {buttonText1}
-            </button>
-            <button
-              type="button"
-              className="btn btn-lg btn-danger mx-2"
-              style={{ borderRadius: "10px", width: "200px" }}
-            >
-              {buttonText2}
-            </button>
-          </div>
+          <h1 className="display-2">{!gameOver ? text : ""}</h1>
+          {gameOver ? (
+            <>
+              <h2>{gameResult}</h2>
+              <button
+                type="button"
+                className="btn btn-lg btn-outline-danger mt-5"
+                onClick={restartGame}
+              >
+                Yeniden Başlat
+              </button>
+            </>
+          ) : (
+            <div className="btn-group mt-5">
+              <button
+                type="button"
+                className="btn btn-lg btn-danger mx-2"
+                style={{ borderRadius: "10px", width: "200px" }}
+                onClick={() => playGame("Deve")}
+              >
+                Deve
+              </button>
+              <button
+                type="button"
+                className="btn btn-lg btn-danger mx-2"
+                style={{ borderRadius: "10px", width: "200px" }}
+                onClick={() => playGame("Cüce")}
+              >
+                Cüce
+              </button>
+            </div>
+          )}
         </div>
         <div className="scoreboard mt-3 border-top pt-3">
-          <p className="mb-2">Skor: 🔻 </p>
-          <div class="progress mt-2">
+          <p className="mb-2">Puanınız: </p>
+          <div className="progress mt-2">
             <div
-              class="progress-bar progress-bar-striped bg-success progress-bar-animated"
+              className="progress-bar progress-bar-striped bg-success progress-bar-animated"
               role="progressbar"
-              style={{ width: "10%" }}
-              aria-valuenow="10"
+              style={{ width: `${score * 20}%` }}
+              aria-valuenow={score * 20}
               aria-valuemin="0"
               aria-valuemax="100"
             ></div>
           </div>
-
-          <div class="progress mt-2">
+          <div className="progress mt-2">
             <div
-              class="progress-bar progress-bar-striped bg-danger progress-bar-animated"
+              className="progress-bar progress-bar-striped bg-danger progress-bar-animated"
               role="progressbar"
-              style={{ width: "10%" }}
-              aria-valuenow="10"
+              style={{ width: `${mistakes * 20}%` }}
+              aria-valuenow={mistakes * 20}
               aria-valuemin="0"
               aria-valuemax="100"
             ></div>
